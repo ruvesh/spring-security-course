@@ -1,0 +1,18 @@
+server:
+  servlet:
+    context-path: /client
+  port: 8081
+
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:securityclient
+    username: client
+    password: password1234
+    driverClassName: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+  h2:
+    console:
+      enabled: true
