@@ -14,6 +14,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import io.github.ruvesh.springsecurityclient.exception.PasswordLengthViolationException;
 import io.github.ruvesh.springsecurityclient.exception.PasswordMismatchException;
+import io.github.ruvesh.springsecurityclient.exception.UserAlreadyVerifiedException;
+import io.github.ruvesh.springsecurityclient.exception.UserVerificationException;
 import io.github.ruvesh.springsecurityclient.model.ExceptionMessageModel;
 import io.github.ruvesh.springsecurityclient.model.ExceptionMessageModel.ExceptionMessageModelBuilder;
 
@@ -49,6 +51,20 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 												.detailMessage(exception.getRootCause().toString())
 												.build();
 		return ResponseEntity.badRequest().body(responseMessage);
+	}
+	
+	@ExceptionHandler(UserVerificationException.class)
+	public ResponseEntity<ExceptionMessageModel> handleUserVerificationException(UserVerificationException exception, ServletWebRequest request){
+		ExceptionMessageModel responseMessage = commonExceptionMessageModelBuilder(exception, request, HttpStatus.UNAUTHORIZED)
+				.build();
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMessage);
+	}
+	
+	@ExceptionHandler(UserAlreadyVerifiedException.class)
+	public ResponseEntity<ExceptionMessageModel> handleUserAlreadyVerifiedException(UserAlreadyVerifiedException exception, ServletWebRequest request){
+		ExceptionMessageModel responseMessage = commonExceptionMessageModelBuilder(exception, request, HttpStatus.CONFLICT)
+				.build();
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(responseMessage);
 	}
 	
 	private ExceptionMessageModelBuilder commonExceptionMessageModelBuilder(Exception exception, ServletWebRequest request, HttpStatus status) {
