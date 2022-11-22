@@ -9,4 +9,6 @@ public interface UserService {
 	
 	User registerUser(UserModel userModel) throws PasswordMismatchException, PasswordLengthViolationException;
 
+	void saveVerificationToken(User user, String token);
+
 }

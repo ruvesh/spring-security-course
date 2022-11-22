@@ -5,10 +5,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import io.github.ruvesh.springsecurityclient.entity.User;
+import io.github.ruvesh.springsecurityclient.entity.VerificationToken;
 import io.github.ruvesh.springsecurityclient.exception.PasswordLengthViolationException;
 import io.github.ruvesh.springsecurityclient.exception.PasswordMismatchException;
 import io.github.ruvesh.springsecurityclient.model.UserModel;
 import io.github.ruvesh.springsecurityclient.repository.UserRepository;
+import io.github.ruvesh.springsecurityclient.repository.VerificationTokenRepository;
 import io.github.ruvesh.springsecurityclient.service.UserService;
 
 @Service
@@ -16,6 +18,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private VerificationTokenRepository verificationTokenRepository;
 	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -33,6 +38,13 @@ public class UserServiceImpl implements UserService {
 					.password(passwordEncoder.encode(userModel.getPassword()))
 					.build();
 		return userRepository.save(user);
+	}
+
+	@Override
+	public void saveVerificationToken(User user, String token) {
+		VerificationToken verificationToken = new VerificationToken(user, token);
+		verificationTokenRepository.save(verificationToken);
+		
 	}
 
 }

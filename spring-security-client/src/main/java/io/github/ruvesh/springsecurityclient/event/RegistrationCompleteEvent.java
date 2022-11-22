@@ -10,14 +10,16 @@ import lombok.Setter;
 @Setter
 public class RegistrationCompleteEvent extends ApplicationEvent {
 
+	private static final long serialVersionUID = 9145578542864865543L;
+
 	private User user;
 
-	private String applicationUrl;
+	private String applicationBaseUrl;
 
-	public RegistrationCompleteEvent(User user, String applicationUrl) {
+	public RegistrationCompleteEvent(User user, String applicationBaseUrl) {
 		super(user);
 		this.user = user;
-		this.applicationUrl = applicationUrl;
+		this.applicationBaseUrl = applicationBaseUrl;
 	}
 
 }
