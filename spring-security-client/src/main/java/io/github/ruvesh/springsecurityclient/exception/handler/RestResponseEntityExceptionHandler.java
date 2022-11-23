@@ -15,6 +15,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import io.github.ruvesh.springsecurityclient.exception.PasswordLengthViolationException;
 import io.github.ruvesh.springsecurityclient.exception.PasswordMismatchException;
 import io.github.ruvesh.springsecurityclient.exception.UserAlreadyVerifiedException;
+import io.github.ruvesh.springsecurityclient.exception.UserBlockedException;
+import io.github.ruvesh.springsecurityclient.exception.UserNotFoundException;
 import io.github.ruvesh.springsecurityclient.exception.UserVerificationException;
 import io.github.ruvesh.springsecurityclient.model.ExceptionMessageModel;
 import io.github.ruvesh.springsecurityclient.model.ExceptionMessageModel.ExceptionMessageModelBuilder;
@@ -65,6 +67,20 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 		ExceptionMessageModel responseMessage = commonExceptionMessageModelBuilder(exception, request, HttpStatus.CONFLICT)
 				.build();
 		return ResponseEntity.status(HttpStatus.CONFLICT).body(responseMessage);
+	}
+	
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<ExceptionMessageModel> handleUserNotFoundException(UserNotFoundException exception, ServletWebRequest request){
+		ExceptionMessageModel responseMessage = commonExceptionMessageModelBuilder(exception, request, HttpStatus.NOT_FOUND)
+				.build();
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseMessage);
+	}
+	
+	@ExceptionHandler(UserBlockedException.class)
+	public ResponseEntity<ExceptionMessageModel> handleUserBlockedException(UserBlockedException exception, ServletWebRequest request){
+		ExceptionMessageModel responseMessage = commonExceptionMessageModelBuilder(exception, request, HttpStatus.FORBIDDEN)
+				.build();
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(responseMessage);
 	}
 	
 	private ExceptionMessageModelBuilder commonExceptionMessageModelBuilder(Exception exception, ServletWebRequest request, HttpStatus status) {

@@ -8,6 +8,8 @@ import io.github.ruvesh.springsecurityclient.entity.VerificationToken;
 import io.github.ruvesh.springsecurityclient.exception.PasswordLengthViolationException;
 import io.github.ruvesh.springsecurityclient.exception.PasswordMismatchException;
 import io.github.ruvesh.springsecurityclient.exception.UserAlreadyVerifiedException;
+import io.github.ruvesh.springsecurityclient.exception.UserBlockedException;
+import io.github.ruvesh.springsecurityclient.exception.UserNotFoundException;
 import io.github.ruvesh.springsecurityclient.exception.UserVerificationException;
 import io.github.ruvesh.springsecurityclient.model.UserModel;
 import io.github.ruvesh.springsecurityclient.repository.UserRepository;
@@ -41,20 +43,30 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void saveVerificationToken(User user, String token) {
-		VerificationToken verificationToken = new VerificationToken(user, token);
+		VerificationToken verificationToken = verificationTokenRepository.findByToken(token).orElseGet(() -> new VerificationToken(user, token));
 		verificationTokenRepository.save(verificationToken);
 
 	}
 
 	@Override
 	public void verifyUser(String token) throws UserVerificationException, UserAlreadyVerifiedException {
-		VerificationToken verificationToken = verificationTokenRepository.getByToken(token)
+		VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
 				.orElseThrow(() -> new UserVerificationException("Invalid Token"));
-		if(CommonUtil.isTokenExpired(verificationToken.getExpiryTime())) throw new UserVerificationException("Token has expired");
 		User user = verificationToken.getUser();
 		if(user.getIsEnabled()) throw new UserAlreadyVerifiedException();
+		if(CommonUtil.isTokenExpired(verificationToken.getExpiryTime())) {
+			verificationTokenRepository.delete(verificationToken);
+			throw new UserVerificationException("Token has expired");
+		}
 		user.setIsEnabled(true);
 		userRepository.save(user);
 	}
 
+	@Override
+	public User checkUserAndVerificationStatus(String emailId) throws UserNotFoundException, UserAlreadyVerifiedException, UserBlockedException {
+		User user = userRepository.findByEmail(emailId).orElseThrow(() -> new UserNotFoundException(emailId));
+		if(user.getIsBlocked()) throw new UserBlockedException(emailId);
+		if(user.getIsEnabled()) throw new UserAlreadyVerifiedException();
+		return user;
+	}
 }

@@ -10,6 +10,8 @@ import io.github.ruvesh.springsecurityclient.entity.VerificationToken;
 @Repository
 public interface VerificationTokenRepository extends JpaRepository<VerificationToken, Long> {
 
-	Optional<VerificationToken> getByToken(String token);
+	Optional<VerificationToken> findByToken(String token);
+
+	Optional<VerificationToken> findByUserId(Long id);
 
 }

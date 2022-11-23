@@ -47,4 +47,7 @@ public class User {
 	@Builder.Default
 	private Boolean isEnabled=false;
 	
+	@Builder.Default
+	private Boolean isBlocked=false;
+	
 }

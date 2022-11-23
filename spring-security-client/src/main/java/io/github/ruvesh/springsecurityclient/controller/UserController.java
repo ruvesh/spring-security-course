@@ -22,6 +22,8 @@ import io.github.ruvesh.springsecurityclient.event.RegistrationCompleteEvent;
 import io.github.ruvesh.springsecurityclient.exception.PasswordLengthViolationException;
 import io.github.ruvesh.springsecurityclient.exception.PasswordMismatchException;
 import io.github.ruvesh.springsecurityclient.exception.UserAlreadyVerifiedException;
+import io.github.ruvesh.springsecurityclient.exception.UserBlockedException;
+import io.github.ruvesh.springsecurityclient.exception.UserNotFoundException;
 import io.github.ruvesh.springsecurityclient.exception.UserVerificationException;
 import io.github.ruvesh.springsecurityclient.model.RestResponseModel;
 import io.github.ruvesh.springsecurityclient.model.UserModel;
@@ -50,7 +52,7 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(RestResponseModel.builder()
 				.message("User Created Successfully. A verification mail has been sent to the registed email id.")
 				.extras(List.of(CommonUtil.prepareRestEndpoint(applicationBaseUrl,
-						String.format(VERIFY_RESEND_URL, user.getId()), null)))
+						String.format(VERIFY_RESEND_URL, user.getEmail()), null)))
 				.code(HttpStatus.CREATED.value()).status(HttpStatus.CREATED).data(new UserDTO(user)).build());
 	}
 
@@ -63,11 +65,13 @@ public class UserController {
 						.status(HttpStatus.OK).code(HttpStatus.OK.value()).build());
 	}
 
-	@GetMapping("/{id}/verify/resend")
-	public ResponseEntity<RestResponseModel> resendVerificationLink(@PathVariable("id") Long userId, final HttpServletRequest request) {
-		// TODO
-		return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
-				.body(RestResponseModel.builder().message("Will be added in future commits")
-						.code(HttpStatus.NOT_IMPLEMENTED.value()).status(HttpStatus.NOT_IMPLEMENTED).build());
+	@GetMapping("/{email}/verify/resend")
+	public ResponseEntity<RestResponseModel> resendVerificationLink(@PathVariable("email") String emailId, final HttpServletRequest request) throws UserNotFoundException, UserAlreadyVerifiedException, UserBlockedException {
+		User user = userService.checkUserAndVerificationStatus(emailId);
+		String applicationBaseUrl = CommonUtil.prepareApplicationUrlFromHttpRequest(request);
+		eventPublisher.publishEvent(new RegistrationCompleteEvent(user, applicationBaseUrl));
+		return ResponseEntity.status(HttpStatus.ACCEPTED)
+				.body(RestResponseModel.builder().message("Your request has been submitted. You will receive the link shortly.")
+						.code(HttpStatus.ACCEPTED.value()).status(HttpStatus.ACCEPTED).build());
 	}
 }
