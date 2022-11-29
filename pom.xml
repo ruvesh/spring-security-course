@@ -9,5 +9,6 @@
 
 	<modules>
 		<module>spring-security-client</module>
+		<module>spring-security-authorization-server</module>
 	</modules>
 </project>
