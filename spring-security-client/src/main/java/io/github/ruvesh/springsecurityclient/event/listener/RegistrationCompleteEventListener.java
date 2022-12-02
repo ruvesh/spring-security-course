@@ -20,24 +20,23 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
 
 	private static final String VERIFICATION_URL = "/users/verify";
 
-	private static final String TOKEN = UUID.randomUUID().toString();;
-
 	@Autowired
 	private UserService userService;
 
 	@Override
 	public void onApplicationEvent(RegistrationCompleteEvent event) {
+		String token = UUID.randomUUID().toString();
 		User user = event.getUser();
 		String verificationUrl = CommonUtil.prepareRestEndpoint(event.getApplicationBaseUrl(), VERIFICATION_URL,
-				prepareQueryParameters());
-		userService.saveVerificationToken(user, TOKEN);
+				prepareQueryParameters(token));
+		userService.saveVerificationToken(user, token);
 		// TODO Add Email trigger framework
 		log.info(verificationUrl);
 	}
 
-	private Map<String, String> prepareQueryParameters() {
+	private Map<String, String> prepareQueryParameters(String token) {
 		Map<String, String> queryParameters = new HashMap<>();
-		queryParameters.put("token", TOKEN);
+		queryParameters.put("token", token);
 		return queryParameters;
 	}
 
